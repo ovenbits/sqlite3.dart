@@ -394,7 +394,19 @@ class _OffsetAndBuffer {
 final class IndexedDbFileSystem extends BaseVirtualFileSystem {
   final AsynchronousIndexedDbFileSystem _asynchronous;
 
-  Future<Uint8List> readFully(int fileId) => _asynchronous.readFully(fileId);
+  Future<Map<String, Uint8List>> dumpAllFiles() async {
+    final result = <String, Uint8List>{};
+
+    for (final entry in _knownFileIds.entries) {
+      final fileName = entry.key;
+      final fileId = entry.value;
+
+      final fileContent = await _asynchronous.readFully(fileId);
+      result[fileName] = fileContent;
+    }
+
+    return result;
+  }
 
   var _isClosing = false;
   _IndexedDbWorkItem? _currentWorkItem;
